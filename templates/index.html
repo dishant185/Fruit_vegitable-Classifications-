@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Neon AI Fruit & Vegetable Classifier</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg1: #0a0e17;
+      --bg2: #111827;
+      --neon-a: #8b5cf6;
+      --neon-b: #06b6d4;
+      --neon-c: #10b981;
+      --glass: rgba(255, 255, 255, 0.05);
+      --accent: #ec4899;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+      --card-bg: rgba(15, 23, 42, 0.7);
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle at 0% 0%, var(--bg1), var(--bg2));
+      color: var(--text-primary);
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* Professional Gradient Background */
+    .gradient-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+    }
+    
+    /* Animated grid overlay */
+    .grid-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
+      -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 70%);
+    }
+    
+    /* Floating animated elements */
+    .floating-element {
+      position: fixed;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-a), var(--neon-b));
+      opacity: 0.03;
+      filter: blur(40px);
+      z-index: -1;
+    }
+    
+    .float-1 {
+      width: 400px;
+      height: 400px;
+      top: 20%;
+      left: 10%;
+      animation: float 25s infinite ease-in-out;
+    }
+    
+    .float-2 {
+      width: 300px;
+      height: 300px;
+      bottom: 15%;
+      right: 10%;
+      background: linear-gradient(135deg, var(--neon-c), var(--accent));
+      animation: float 30s infinite ease-in-out reverse;
+      animation-delay: 2s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -30px) scale(1.05); }
+      66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+    
+    .main-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      position: relative;
+    }
+    
+    .container-card {
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 50px;
+      box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .container-card:hover {
+      box-shadow: 
+        0 32px 64px -12px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      transform: translateY(-4px);
+    }
+    
+    .container-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon-a), var(--neon-b), transparent);
+    }
+    
+    .container-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, 
+        rgba(139, 92, 246, 0.03) 0%, 
+        transparent 30%,
+        transparent 70%,
+        rgba(6, 182, 212, 0.03) 100%);
+      z-index: -1;
+    }
+    
+    /* Header with professional layout */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      margin-bottom: 50px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex: 1;
+    }
+    
+    .logo-container {
+      position: relative;
+    }
+    
+    .logo {
+      height: 90px;
+      width: 90px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--neon-a), var(--neon-b));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 32px;
+      box-shadow: 
+        0 20px 40px rgba(139, 92, 246, 0.2),
+        0 0 40px rgba(6, 182, 212, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.4s ease;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .logo::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, var(--neon-a), var(--neon-b), var(--neon-c));
+      border-radius: 26px;
+      z-index: -1;
+      opacity: 0.5;
+      filter: blur(15px);
+    }
+    
+    .logo i {
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+    }
+    
+    .logo:hover {
+      transform: translateY(-5px) rotate(5deg);
+      box-shadow: 
+        0 30px 50px rgba(139, 92, 246, 0.3),
+        0 0 60px rgba(6, 182, 212, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    .title-section {
+      flex: 1;
+    }
+    
+    h1 {
+      font-size: 36px;
+      margin: 0 0 12px 0;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--neon-a), var(--neon-b));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    
+    .subtitle {
+      margin: 0;
+      color: var(--text-secondary);
+      font-weight: 400;
+      font-size: 16px;
+      max-width: 600px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+    
+    /* Stats with improved design */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin: 40px 0;
+      padding: 30px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-item:hover {
+      background: rgba(139, 92, 246, 0.08);
+      transform: translateY(-2px);
+    }
+    
+    .stat-value {
+      font-size: 40px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--neon-a), var(--neon-b));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* Upload Box - Enhanced */
+    .upload-box {
+      border-radius: 24px;
+      padding: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    
+    .upload-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--neon-a), var(--neon-b));
+    }
+    
+    .upload-box::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    .upload-box:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform: translateY(-5px);
+    }
+    
+    /* Enhanced form elements */
+    .form-label {
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 18px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    
+    .file-upload-area {
+      position: relative;
+      border: 2px dashed rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 50px 30px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .file-upload-area:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      background: rgba(139, 92, 246, 0.05);
+    }
+    
+    .file-upload-area i {
+      font-size: 48px;
+      color: var(--neon-a);
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+    
+    .upload-text h4 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    
+    .upload-text p {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    
+    /* Buttons - Enhanced */
+    .btn-neon {
+      background: linear-gradient(90deg, var(--neon-a), var(--neon-b));
+      color: white;
+      font-weight: 600;
+      border-radius: 14px;
+      padding: 16px 32px;
+      border: none;
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      letter-spacing: 0.5px;
+      min-width: 140px;
+    }
+    
+    .btn-neon:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(139, 92, 246, 0.35);
+      color: white;
+    }
+    
+    .btn-neon:active {
+      transform: translateY(-1px);
+    }
+    
+    .btn-outline-neon {
+      background: transparent;
+      border: 2px solid rgba(139, 92, 246, 0.4);
+      color: var(--text-primary);
+      font-weight: 600;
+      border-radius: 14px;
+      padding: 14px 30px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-width: 140px;
+    }
+    
+    .btn-outline-neon:hover {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: var(--neon-a);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.2);
+    }
+    
+    /* Image preview - Enhanced */
+    .preview-img {
+      height: 160px;
+      width: 160px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    
+    .preview-img:hover {
+      transform: scale(1.1) rotate(2deg);
+      border-color: rgba(139, 92, 246, 0.6);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.3),
+        0 0 25px rgba(139, 92, 246, 0.4);
+    }
+    
+    /* Loader - Enhanced */
+    .loader {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 30px;
+      padding: 25px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .loader::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    .loader .spinner-border {
+      width: 32px;
+      height: 32px;
+      border-width: 3px;
+      color: var(--neon-a);
+    }
+    
+    /* Tip Box - Enhanced */
+    .tip-box {
+      margin-top: 40px;
+      padding: 25px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, 
+        rgba(139, 92, 246, 0.1), 
+        rgba(6, 182, 212, 0.1));
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .tip-box::before {
+      content: '💡';
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 32px;
+      opacity: 0.2;
+    }
+    
+    /* Responsive improvements */
+    @media (max-width: 992px) {
+      .main-container {
+        padding: 0 15px;
+        margin: 20px auto;
+      }
+      
+      .container-card {
+        padding: 40px 30px;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 30px;
+      }
+      
+      .stats {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .upload-box {
+        padding: 30px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container-card {
+        padding: 30px 20px;
+        border-radius: 24px;
+      }
+      
+      .logo {
+        height: 70px;
+        width: 70px;
+        font-size: 28px;
+      }
+      
+      h1 {
+        font-size: 28px;
+      }
+      
+      .subtitle {
+        font-size: 15px;
+      }
+      
+      .btn-neon, .btn-outline-neon {
+        padding: 14px 24px;
+        min-width: 120px;
+      }
+      
+      .preview-img {
+        height: 120px;
+        width: 120px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .main-container {
+        margin: 15px auto;
+      }
+      
+      .container-card {
+        padding: 25px 15px;
+        border-radius: 20px;
+      }
+      
+      .upload-box {
+        padding: 25px 15px;
+      }
+      
+      .logo {
+        height: 60px;
+        width: 60px;
+        font-size: 24px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .btn-neon, .btn-outline-neon {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+    
+    /* Action buttons container */
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    /* File input wrapper */
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: block;
+    }
+    
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Enhanced Background -->
+  <div class="gradient-bg"></div>
+  <div class="grid-overlay"></div>
+  <div class="floating-element float-1"></div>
+  <div class="floating-element float-2"></div>
+  
+  <!-- Main Content -->
+  <div class="main-container">
+    <div class="container-card">
+      <div class="header">
+        <div class="brand">
+          <div class="logo-container">
+            <div class="logo">
+              <i class="fas fa-robot"></i>
+            </div>
+          </div>
+          <div class="title-section">
+            <h1>Neon AI Fruit & Vegetable Classifier</h1>
+            <p class="subtitle">Upload clear photos of fruits & vegetables — get instant predictions plus delicious recipes</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Stats Section -->
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-value">95%</div>
+          <div class="stat-label">Accuracy Rate</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">50+</div>
+          <div class="stat-label">Food Types</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">2s</div>
+          <div class="stat-label">Avg. Prediction Time</div>
+        </div>
+      </div>
+      
+      <!-- Upload Section -->
+      <div class="upload-box">
+        <form id="uploadForm" action="/predict" method="POST" enctype="multipart/form-data">
+          <label class="form-label">Select one or more images (JPG, PNG, WebP)</label>
+          
+          <div class="file-upload-area">
+            <div class="file-input-wrapper">
+              <input id="fileinput" onchange="previewImages(event)" name="images" type="file" accept="image/*" multiple />
+              <div class="upload-text">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h4>Drag & drop or click to browse</h4>
+                <p>Supports up to 10 images simultaneously</p>
+                <div class="btn-outline-neon">
+                  <i class="fas fa-folder-open"></i>
+                  Browse Files
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="preview" class="d-flex flex-wrap mt-4 justify-content-center"></div>
+          
+          <div class="btn-group">
+            <button type="submit" class="btn-neon">
+              <i class="fas fa-brain"></i>
+              Analyze with AI
+            </button>
+            <button type="button" onclick="clearPreview()" class="btn-outline-neon">
+              <i class="fas fa-trash-alt"></i>
+              Clear All
+            </button>
+          </div>
+          
+          <div id="loader" class="loader" style="display:none;">
+            <div class="spinner-border" role="status"></div>
+            <div>AI is analyzing your images... This will just take a moment</div>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Tip Box -->
+      <div class="tip-box">
+        <strong>Pro Tip:</strong> For best results, use bright, focused images with one fruit or vegetable centered. Natural light works best!
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Preview functions
+    function previewImages(e) {
+      const preview = document.getElementById("preview");
+      preview.innerHTML = "";
+      
+      const files = Array.from(e.target.files || []);
+      files.slice(0, 10).forEach((file, index) => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.className = "preview-img";
+        img.alt = `Preview ${index + 1}`;
+        preview.appendChild(img);
+      });
+      
+      // Show message if more than 10 files selected
+      if (files.length > 10) {
+        const message = document.createElement("div");
+        message.className = "alert alert-info mt-3 w-100 text-center";
+        message.style.cssText = `
+          background: rgba(6, 182, 212, 0.1);
+          border: 1px solid rgba(6, 182, 212, 0.3);
+          color: var(--text-secondary);
+          padding: 15px;
+          border-radius: 12px;
+          backdrop-filter: blur(10px);
+        `;
+        message.textContent = `Only showing first 10 of ${files.length} images selected`;
+        preview.appendChild(message);
+      }
+      
+      // Show preview container if we have images
+      if (files.length > 0) {
+        preview.style.display = "flex";
+      }
+    }
+    
+    function clearPreview() {
+      document.getElementById("preview").innerHTML = "";
+      document.getElementById("fileinput").value = "";
+    }
+    
+    // Form submission loader
+    document.getElementById("uploadForm").addEventListener("submit", () => {
+      document.getElementById("loader").style.display = "flex";
+      
+      // Simulate a short delay for demo purposes
+      setTimeout(() => {
+        // In a real app, this would be handled by the server response
+        // For demo, we'll hide the loader after 3 seconds
+        // document.getElementById("loader").style.display = "none";
+      }, 3000);
+    });
+    
+    // Add subtle animation to stats on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const stats = document.querySelectorAll('.stat-item');
+      stats.forEach((stat, index) => {
+        setTimeout(() => {
+          stat.style.opacity = '0';
+          stat.style.transform = 'translateY(20px)';
+          stat.offsetHeight; // Trigger reflow
+          stat.style.transition = 'all 0.6s ease';
+          stat.style.opacity = '1';
+          stat.style.transform = 'translateY(0)';
+        }, index * 200);
+      });
+    });
+  </script>
+</body>
+</html>
